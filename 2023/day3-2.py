@@ -38,6 +38,10 @@ so its gear ratio is 16345. The second gear is in the lower right; its gear rati
 Adding up all of the gear ratios produces 467835.
 
 What is the sum of all of the gear ratios in your engine schematic?
+
+Solution:
+Build a hash with potential gear (*) position as a key and connected list of part numbers.
+If list is only two part numbers then * is a actual gear and should be counted.
 """
 
 import sys
@@ -53,15 +57,19 @@ def get_part_number(engine_schematic: list[str]) -> int:
         for number in re.finditer(r'\d+', line_text):
             start_position = number.start()
             end_position = number.end()   # index after the matching character
-            surrounding_characters = ""
+            gear_locations = {}
             # print(f"Line: {line_text}\n Start position: {start_position} End position: {end_position}")
             # collect character on the left
             if start_position > 0:
                 start_position -= 1
-                surrounding_characters += line_text[start_position]
+                if line_text[start_position] == '*':
+                    gear_key = (line_number, start_position)
+                    gear_locations[gear_key] = gear_locations.get(gear_key, []) + int(line_text)
             # collect character on the right
             if end_position < len(line_text):
-                surrounding_characters += line_text[end_position]
+                if line_text[end_position] == '*':
+                    gear_key = (line_number, end_position)
+                    gear_locations[gear_key] = gear_locations.get(gear_key, []) + int(line_text)
             # collect characters above
             if line_number > 0:
                 surrounding_characters += engine_schematic[line_number-1][start_position:end_position+1]
