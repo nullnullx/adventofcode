@@ -40,50 +40,67 @@ Adding up all of the gear ratios produces 467835.
 What is the sum of all of the gear ratios in your engine schematic?
 
 Solution:
-Build a hash with potential gear (*) position as a key and connected list of part numbers.
+Build a dict with potential gear (*) position as a key and list of connected part numbers.
 If list is only two part numbers then * is a actual gear and should be counted.
 """
 
 import sys
 import re
+from functools import reduce
 
 
 def load_input():
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], 'r') as fp:
+            return fp.read().splitlines()
     return sys.stdin.read().splitlines()
 
-def get_part_number(engine_schematic: list[str]) -> int:
-    non_symbols = set('0123456789.')
+def get_all_gears(engine_schematic: list[str]) -> int:
+    gear_locations = {}
     for line_number, line_text in enumerate(engine_schematic):
         for number in re.finditer(r'\d+', line_text):
             start_position = number.start()
             end_position = number.end()   # index after the matching character
-            gear_locations = {}
-            # print(f"Line: {line_text}\n Start position: {start_position} End position: {end_position}")
             # collect character on the left
             if start_position > 0:
                 start_position -= 1
                 if line_text[start_position] == '*':
-                    gear_key = (line_number, start_position)
-                    gear_locations[gear_key] = gear_locations.get(gear_key, []) + int(line_text)
+                    update_gear_key(gear_locations, (line_number, start_position), number.group())
             # collect character on the right
             if end_position < len(line_text):
                 if line_text[end_position] == '*':
-                    gear_key = (line_number, end_position)
-                    gear_locations[gear_key] = gear_locations.get(gear_key, []) + int(line_text)
+                    update_gear_key(gear_locations, (line_number, end_position), number.group())
             # collect characters above
             if line_number > 0:
-                surrounding_characters += engine_schematic[line_number-1][start_position:end_position+1]
+                surrounding_characters = engine_schematic[line_number-1][start_position:end_position+1]
+                # find all potential gears in the string
+                for gear in re.finditer(r'\*', surrounding_characters):
+                    gear_position = start_position + gear.start()
+                    update_gear_key(gear_locations, (line_number-1, gear_position), number.group())
             # collect characters below
             if line_number < len(engine_schematic)-1:
-                surrounding_characters += engine_schematic[line_number+1][start_position:end_position+1]
-            # check if any collected character is a symbol
-            if not set(surrounding_characters).issubset(non_symbols):
-                yield int(number.group())
-            
+                surrounding_characters = engine_schematic[line_number+1][start_position:end_position+1]
+                # find all potential gears in the string
+                for gear in re.finditer(r'\*', surrounding_characters):
+                    gear_position = start_position + gear.start()
+                    update_gear_key(gear_locations, (line_number+1, gear_position), number.group())
+    return gear_locations
 
-sum_of_parts = 0
+def update_gear_key(gear_locations: dict, gear_key: tuple, part_number: str) -> None:
+    """Add or update gear key in gear_locations argument.
+
+    Args:
+        gear_locations (dict): dictionary with all gears
+        gear_key (tuple): gear key (coordinate) to be added or updated
+        part_number (str): part number to associate with a gear
+
+    Returns:
+        None
+    """
+    gear_locations[gear_key] = gear_locations.get(gear_key, []) + [int(part_number)]
+
 engine_schematic = load_input()
-for part_number in get_part_number(engine_schematic):
-    # print(f"Part: {part_number}")
-    sum_of_parts += part_number
+all_gears = get_all_gears(engine_schematic)
+# Find gears connected to only two part numbers. Multiply those part numbers and sum up all together.
+sum_of_parts = reduce((lambda x, y: x + y), [part[0] * part[1] for part in all_gears.values() if len(part)==2])
 print(sum_of_parts)

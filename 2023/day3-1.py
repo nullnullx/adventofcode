@@ -74,10 +74,10 @@ def get_part_number(engine_schematic: list[str]) -> int:
                 surrounding_characters += line_text[end_position]
             # collect characters above
             if line_number > 0:
-                surrounding_characters += engine_schematic[line_number-1][start_position:end_position+1]
+                surrounding_characters += engine_schematic[line_number-1][start_position:end_position+1]  # End index over the limit is Ok
             # collect characters below
             if line_number < len(engine_schematic)-1:
-                surrounding_characters += engine_schematic[line_number+1][start_position:end_position+1]
+                surrounding_characters += engine_schematic[line_number+1][start_position:end_position+1]  # End index over the limit is Ok
             # check if any collected character is a symbol
             if not set(surrounding_characters).issubset(non_symbols):
                 yield int(number.group())
