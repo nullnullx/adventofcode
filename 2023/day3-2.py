@@ -46,7 +46,6 @@ If list is only two part numbers then * is a actual gear and should be counted.
 
 import sys
 import re
-from functools import reduce
 
 
 def load_input():
@@ -102,5 +101,5 @@ def update_gear_key(gear_locations: dict, gear_key: tuple, part_number: str) -> 
 engine_schematic = load_input()
 all_gears = get_all_gears(engine_schematic)
 # Find gears connected to only two part numbers. Multiply those part numbers and sum up all together.
-sum_of_parts = reduce((lambda x, y: x + y), [part[0] * part[1] for part in all_gears.values() if len(part)==2])
+sum_of_parts = sum([part[0] * part[1] for part in all_gears.values() if len(part)==2])
 print(sum_of_parts)
