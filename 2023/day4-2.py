@@ -46,17 +46,19 @@ Including the original set of scratchcards, how many total scratchcards do you e
 
 
 Solution:
+Build a list with number of intersection between winning and our numbers for each card.
+Build a list with counter representing number of each card. Increment card counter by 1 when previous card has winning numbers.
 Collect winning and numbers we have into two separate sets.
-Find sets intersection size and raise 2 to the power of that size.
+Sum up all elements of the list representing number of each card.
 """
 
 import sys
 
 
-def load_input() -> str:
+def load_input() -> list[str]:
     if len(sys.argv) > 1:
-        with open(sys.argv[1], 'r') as fp:
-            return fp.read().splitlines()
+        with open(sys.argv[1], 'r') as fh:
+            return fh.read().splitlines()
     return sys.stdin.read().splitlines()
 
 def match_matrix(scratchcards: str) -> list[int]:

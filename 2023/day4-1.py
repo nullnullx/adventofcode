@@ -66,10 +66,10 @@ Find sets intersection size and raise 2 to the power of that size.
 import sys
 
 
-def load_input():
+def load_input() -> list[str]:
     if len(sys.argv) > 1:
-        with open(sys.argv[1], 'r') as fp:
-            return fp.read().splitlines()
+        with open(sys.argv[1], 'r') as fh:
+            return fh.read().splitlines()
     return sys.stdin.read().splitlines()
 
 

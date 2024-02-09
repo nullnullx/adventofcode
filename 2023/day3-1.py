@@ -54,7 +54,10 @@ import sys
 import re
 
 
-def load_input():
+def load_input() -> list[str]:
+    if len(sys.argv) > 1:
+        with open(sys.argv[1], 'r') as fh:
+            return fh.read().splitlines()
     return sys.stdin.read().splitlines()
 
 def get_part_number(engine_schematic: list[str]) -> int:
