@@ -52,8 +52,9 @@ Take a look at the little Elf's word search. How many times does XMAS appear?
 
 
 Solution:
-Use regular expression to find valid mul instructions.
-Extract each number from mul instruction as a group in regular expression by using ( )
+Use count() method to count number of XMAS appearances in the string.
+Search for XMAS in every row, then every column, every left-to-right diagonal and every right-to-left diagonal.
+To search for SAMX, reverse search word or search string using [::-1].
 """
 
 
@@ -68,7 +69,7 @@ def search_horizontal(input: tuple[str]) -> int:
     total_found = 0
     for row in input:
         total_found += row.count(THE_WORD)
-        total_found += row[::-1].count(THE_WORD)
+        total_found += row.count(THE_WORD[::-1])
     return total_found
 
 
@@ -76,7 +77,7 @@ def search_vertical(input: tuple[str]) -> int:
     total_found = 0
     for column in map(lambda x: ''.join(x), zip(*input)):
         total_found += column.count(THE_WORD)
-        total_found += column[::-1].count(THE_WORD)
+        total_found += column.count(THE_WORD[::-1])
     return total_found
 
 
@@ -85,20 +86,22 @@ def search_diagonal(input: tuple[str]) -> int:
     y_size = len(input)
     total_found = 0
     
+    # TODO: merge first and third for loop. Merge second and fourth for loop.
+    # TODO: stop for loop earlier - no need to check strings shorten than len("XMAS")
     for x_coordinate in range(x_size):
         diagonal = ''.join([input[i-x_coordinate][i] for i in range(x_coordinate, x_size)])
         total_found += diagonal.count(THE_WORD)
-        total_found += diagonal[::-1].count(THE_WORD)
+        total_found += diagonal.count(THE_WORD[::-1])
 
     for y_coordinate in range(1, y_size):
         diagonal = ''.join([input[i][i-y_coordinate] for i in range(y_coordinate, y_size)])
         total_found += diagonal.count(THE_WORD)
-        total_found += diagonal[::-1].count(THE_WORD)
+        total_found += diagonal.count(THE_WORD[::-1])
 
     for x_coordinate in range(x_size):
         diagonal = ''.join([input[i-x_coordinate][x_size-i-1] for i in range(x_coordinate, x_size)])
         total_found += diagonal.count(THE_WORD)
-        total_found += diagonal[::-1].count(THE_WORD)
+        total_found += diagonal.count(THE_WORD[::-1])
 
     for y_coordinate in range(1, y_size):
         diagonal = ''.join([input[i][x_size-i+y_coordinate-1] for i in range(y_coordinate, y_size)])
@@ -108,7 +111,7 @@ def search_diagonal(input: tuple[str]) -> int:
         #     diagonal += input[i][x_size-i+y_coordinate-1]
         # print(diagonal)
         total_found += diagonal.count(THE_WORD)
-        total_found += diagonal[::-1].count(THE_WORD)
+        total_found += diagonal.count(THE_WORD[::-1])
 
     return total_found
     
