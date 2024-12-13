@@ -63,12 +63,14 @@ from aoc import load_input
 
 THE_WORD = 'XMAS'
 
+
 def search_horizontal(input: tuple[str]) -> int:
     total_found = 0
     for row in input:
         total_found += row.count(THE_WORD)
         total_found += row[::-1].count(THE_WORD)
     return total_found
+
 
 def search_vertical(input: tuple[str]) -> int:
     total_found = 0
@@ -77,17 +79,45 @@ def search_vertical(input: tuple[str]) -> int:
         total_found += column[::-1].count(THE_WORD)
     return total_found
 
+
 def search_diagonal(input: tuple[str]) -> int:
     x_size = len(input[0])
     y_size = len(input)
     total_found = 0
-    for x_coordinate in 
+    
+    for x_coordinate in range(x_size):
+        diagonal = ''.join([input[i-x_coordinate][i] for i in range(x_coordinate, x_size)])
+        total_found += diagonal.count(THE_WORD)
+        total_found += diagonal[::-1].count(THE_WORD)
+
+    for y_coordinate in range(1, y_size):
+        diagonal = ''.join([input[i][i-y_coordinate] for i in range(y_coordinate, y_size)])
+        total_found += diagonal.count(THE_WORD)
+        total_found += diagonal[::-1].count(THE_WORD)
+
+    for x_coordinate in range(x_size):
+        diagonal = ''.join([input[i-x_coordinate][x_size-i-1] for i in range(x_coordinate, x_size)])
+        total_found += diagonal.count(THE_WORD)
+        total_found += diagonal[::-1].count(THE_WORD)
+
+    for y_coordinate in range(1, y_size):
+        diagonal = ''.join([input[i][x_size-i+y_coordinate-1] for i in range(y_coordinate, y_size)])
+        # diagonal = ''
+        # for i in range(1, y_size):
+        #     print(f"{i} {x_size-i+y_coordinate-1}")
+        #     diagonal += input[i][x_size-i+y_coordinate-1]
+        # print(diagonal)
+        total_found += diagonal.count(THE_WORD)
+        total_found += diagonal[::-1].count(THE_WORD)
+
+    return total_found
     
 
 def main() -> None:
     all_input = tuple(load_input())
     total_found = search_horizontal(all_input) 
     total_found += search_vertical(all_input)
+    total_found += search_diagonal(all_input)
 
     print(f"Times XMAS found: {total_found}")
 
