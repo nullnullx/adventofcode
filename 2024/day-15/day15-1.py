@@ -272,7 +272,7 @@ Create warehouse method to visualize current status.
 import sys
 import os
 import time
-from colorama import just_fix_windows_console, Fore, Back, Style
+from colorama import just_fix_windows_console, Fore, Style
 sys.path.append('..')
 from aoc import load_input
 
