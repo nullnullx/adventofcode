@@ -64,7 +64,7 @@ def get_invalid_ids(id_range: str) -> Generator[int, None, None]:
                 yield current_id
             current_id += 1
         else:
-            current_id = int('1' + '0' * length)  # jump to next even length
+            current_id = 10 ** length   # jump to next even length
 
 
 def main() -> None:

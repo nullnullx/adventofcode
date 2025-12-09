@@ -28,8 +28,8 @@ What do you get if you add up all of the invalid IDs using these new rules?
 
 Solution:
 We will need to check repeated sequences of varying lengths. Maximum sequence length is half the number of digits in the ID.
-Break out of look when a non-matching sequence is found.
-Skip checking for the sequence length if the total length is not a multiple of the sequence length.
+Break out of loop when a non-matching sequence is found.
+Skip checking for the sequence length if the ID length is not a multiple of the sequence length.
 Use generator to yield invalid IDs within each range to avoid storing them all in memory.
 """
 
@@ -50,6 +50,7 @@ def is_invalid_id(product_id: int) -> bool:
             continue
         str_match = str_id[0:sequence_len]
         for i in range(sequence_len, length, sequence_len):
+            # Break if any sequence does not match
             if str_id[i:i + sequence_len] != str_match:
                 break
         else:
