@@ -43,40 +43,31 @@ Find all of the paths that lead from svr to out. How many of those paths visit b
 
 
 Solution:
-Represent the devices and their connections as a directed graph using dictionary of lists.
-Then we use recursive depth-first search (DFS) to explore all possible paths from the "svr" node to the "out" node.
-As we build DFS paths, we keep track of the nodes visited in the current path using a set.
-When we reach the "out" node, we check if both "dac" and "fft" are in the visited set.
-If they are, we count that path as valid.
-This solution probably has a bug, as it doesn't produce results for the very long time.
+Represent the devices and their connections as a directed graph using dictionary of tuples.
+If requirement is to find paths that visit intermediate node A, it is more efficient to split the problem:
+Find all paths from start to A, then from A to stop and multiply the results.
+We use recursive depth-first search (DFS) to explore all possible paths in six smaller sub-graphs:
+svr->fft, fft->dac, dac->out and svr->dac, dac->fft, fft->out.
+Result is the sum of the products of the number of paths in each sub-graph.
+Use memoization (@cache decorator) to cache results of sub-graphs for efficiency.
+@cache requires function arguments to be hashable, so we use frozendict to represent the graph.
 """
 
 import sys
+from functools import cache
+from frozendict import frozendict
 
 sys.path.append('..')
-# from aoc import load_input
-def load_input() -> list[str]:
-    """Read input data from the file or STDIN.
-    """
-    if len(sys.argv) > 1:
-        with open(sys.argv[1], 'r') as fh:
-            return fh.read().splitlines()
-    return sys.stdin.read().splitlines()
+from aoc import load_input
 
 
-def dfs_path(graph: dict[str, list[str]], start: str, current_path: set[str] | None = None) -> int:
-    path1 = set() if current_path is None else current_path.copy()
-    if start == 'out':
-        if {'dac', 'fft'}.issubset(path1):
-            return 1
-        else:
-            return 0
+@cache
+def dfs_path(graph: frozendict[str, list[str]], start: str, stop: str) -> int:
+    if start == stop:
+        return 1
     total_paths = 0
-    if start in path1:
-        print(f"Loop detected at {start}, current path: {path1}")
-    path1.add(start)
-    for neighbor in graph.get(start, []):
-        total_paths += dfs_path(graph, neighbor, path1)
+    for neighbor in graph.get(start, ()):
+        total_paths += dfs_path(graph, neighbor, stop)
     return total_paths
 
 
@@ -85,8 +76,14 @@ def main() -> None:
     devices_graph = {}
     for device in devices:
         name, outputs = device.split(': ')
-        devices_graph[name] = outputs.split(' ') if outputs else []
-    print(dfs_path(devices_graph, 'svr'))
+        devices_graph[name] = tuple(outputs.split(' ') if outputs else [])
+    svr_fft = dfs_path(frozendict(devices_graph), 'svr', 'fft')
+    svr_dac = dfs_path(frozendict(devices_graph), 'svr', 'dac')
+    fft_dac = dfs_path(frozendict(devices_graph), 'fft', 'dac')
+    dac_fft = dfs_path(frozendict(devices_graph), 'dac', 'fft')
+    fft_out = dfs_path(frozendict(devices_graph), 'fft', 'out')
+    dac_out = dfs_path(frozendict(devices_graph), 'dac', 'out')
+    print(svr_fft * fft_dac * dac_out + svr_dac * dac_fft * fft_out)
 
 
 if __name__ == "__main__":

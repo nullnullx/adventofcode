@@ -48,22 +48,27 @@ How many different paths lead from you to out?
 
 
 Solution:
-Represent the devices and their connections as a directed graph using dictionary of lists.
+Represent the devices and their connections as a directed graph using dictionary of tuples.
 Then we use recursive depth-first search (DFS) to explore all possible paths from the "you" node to the "out" node.
+Use memoization (@cache decorator) to cache results of sub-graphs for efficiency.
+@cache requires function arguments to be hashable, so we use frozendict to represent the graph.
 """
 
 import sys
+from functools import cache
+from frozendict import frozendict
 
 sys.path.append('..')
 from aoc import load_input
 
 
-def dfs_path(graph: dict[str, list[str]], start: str) -> int:
-    if start == 'out':
+@cache
+def dfs_path(graph: frozendict[str, list[str]], start: str, stop: str) -> int:
+    if start == stop:
         return 1
     total_paths = 0
-    for neighbor in graph.get(start, []):
-        total_paths += dfs_path(graph, neighbor)
+    for neighbor in graph.get(start, ()):
+        total_paths += dfs_path(graph, neighbor, stop)
     return total_paths
 
 
@@ -72,8 +77,8 @@ def main() -> None:
     devices_graph = {}
     for device in devices:
         name, outputs = device.split(': ')
-        devices_graph[name] = outputs.split(' ') if outputs else []
-    print(dfs_path(devices_graph, 'you'))
+        devices_graph[name] = tuple(outputs.split(' ') if outputs else [])
+    print(dfs_path(frozendict(devices_graph), 'svr', 'out'))
 
 
 if __name__ == "__main__":
